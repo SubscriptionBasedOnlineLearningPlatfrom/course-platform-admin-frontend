@@ -2,18 +2,24 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Users from './pages/Users'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import ViewPayment from './pages/ViewPayment'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 function App() {
+
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
-          <Route path="/Users" element={<Users />} />
-          <Route path="/" element={<Login />} />
+    <div className="App">
+      <Routes>
+        <Route>
+          <Route path="/users" element={<Users />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-        </Routes>
+          <Route path="/view-payment" element={<ViewPayment />} />
+          <Route path="/" element={<Dashboard />} />
+        </Route>
+      </Routes>
       </div>
-    </Router>
   )
 }
 
