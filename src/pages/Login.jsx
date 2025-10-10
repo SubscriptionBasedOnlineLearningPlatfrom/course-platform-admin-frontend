@@ -1,17 +1,44 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Mock login - in production, this would validate credentials
-    if (email && password) {
-      alert("Login successful!");
-      // navigate("/dashboard");
-    } else {
-      alert("Please fill in all fields");
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:4000/admin/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the JWT token
+        localStorage.setItem("adminToken", data.token);
+        localStorage.setItem("adminUser", JSON.stringify(data.admin));
+
+        // Navigate to dashboard or users page
+        navigate("/users");
+      } else {
+        setError(data.error || "Login failed");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,6 +61,12 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email
@@ -46,6 +79,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -61,20 +95,22 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                disabled={loading}
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-600">
             Don't have an account?{" "}
-            <a href="#" className="text-blue-600 font-medium hover:underline">
+            <a href="/Register" className="text-blue-600 font-medium hover:underline">
               Register
             </a>
           </div>
