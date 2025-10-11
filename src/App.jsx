@@ -21,7 +21,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />       
           <Route path="/admin/courses" element={<CourseManagement />} />
           <Route path="/admin/analytics" element={<AnalyticsPage />} />
-        </Route>
+       
       </Routes>
       </div>
   )
