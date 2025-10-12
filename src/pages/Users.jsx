@@ -22,7 +22,7 @@ const Users = () => {
         return
       }
 
-      const response = await fetch(`http://localhost:4000/admin/users/all?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+      const response = await fetch(`https://course-platform-backend-ten.vercel.app/admin/users/all?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ const Users = () => {
       const token = localStorage.getItem('adminToken')
       if (!token) return
 
-      const response = await fetch('http://localhost:4000/admin/users/stats', {
+      const response = await fetch('https://course-platform-backend-ten.vercel.app/admin/users/stats', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -82,7 +82,7 @@ const Users = () => {
 
       const newStatus = user.status === 'active' ? 'inactive' : 'active'
 
-      const response = await fetch(`http://localhost:4000/admin/users/${user.user_type}/${user.id}/status`, {
+      const response = await fetch(`https://course-platform-backend-ten.vercel.app/admin/users/${user.user_type}/${user.id}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

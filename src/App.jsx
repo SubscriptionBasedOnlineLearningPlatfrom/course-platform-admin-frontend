@@ -1,30 +1,70 @@
-/* import { BrowserRouter as Router, Routes, Route } from 'react-router-dom' */
-import Users from './pages/Users'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
-import ViewPayment from './pages/ViewPayment'
-import CourseManagement from './pages/CourseManagement.jsx'
-import AnalyticsPage from './pages/AnalyticsPage.jsx'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+import Users from "./pages/Users";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import ViewPayment from "./pages/ViewPayment";
+import CourseManagement from "./pages/CourseManagement";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
-
   return (
-    <div className="App">
-      <Routes>
-        
-          <Route path="/users" element={<Users />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/view-payment" element={<ViewPayment />} />
-          <Route path="/" element={<Dashboard />} />       
-          <Route path="/admin/courses" element={<CourseManagement />} />
-          <Route path="/admin/analytics" element={<AnalyticsPage />} />
+      <div className="App">
+        {/* Show navbar only when logged in */}
+        {localStorage.getItem("token") && <Navbar />}
 
-      </Routes>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Register />} />
+
+          {/* Protected routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/courses"
+            element={
+              <ProtectedRoute>
+                <CourseManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <ProtectedRoute>
+                <AnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/view-payment"
+            element={
+              <ProtectedRoute>
+                <ViewPayment />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
       </div>
-  )
+  );
 }
 
-export default App
+export default App;

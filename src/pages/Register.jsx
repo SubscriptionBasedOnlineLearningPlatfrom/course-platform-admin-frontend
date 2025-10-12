@@ -33,7 +33,7 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:4000/admin/auth/register-public", {
+      const response = await fetch("https://course-platform-backend-ten.vercel.app/admin/auth/register-public", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
