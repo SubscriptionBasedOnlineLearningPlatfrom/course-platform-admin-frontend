@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { register } from "../utils/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -33,31 +34,19 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch("https://course-platform-backend-ten.vercel.app/admin/auth/register-public", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          username: formData.username,
-          password: formData.password,
-          fullName: formData.fullName,
-        }),
+      const data = await register({
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        fullName: formData.fullName,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("Account created successfully! You can now login.");
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
-      } else {
-        setError(data.error || "Registration failed");
-      }
+      setSuccess("Account created successfully! You can now login.");
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (err) {
-      setError("Network error. Please try again.");
+      setError(err.message || "Registration failed");
       console.error("Registration error:", err);
     } finally {
       setLoading(false);
