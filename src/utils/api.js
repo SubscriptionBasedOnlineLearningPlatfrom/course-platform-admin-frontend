@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "https://course-platform-backend-ten.vercel.app",
+  baseURL: import.meta.env.DEV ? '/api' : 'https://course-platform-backend-ten.vercel.app',
 });
 
 // attach token automatically
@@ -25,7 +25,7 @@ api.interceptors.response.use(
 
 // Axios instance for public requests (no token)
 export const publicApi = axios.create({
-  baseURL: "https://course-platform-backend-ten.vercel.app",
+  baseURL: import.meta.env.DEV ? '/api' : 'https://course-platform-backend-ten.vercel.app',
 });
 
 // global response error formatter for publicApi
