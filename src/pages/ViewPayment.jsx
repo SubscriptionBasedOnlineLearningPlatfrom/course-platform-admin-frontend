@@ -44,7 +44,7 @@ const ViewPayments = () => {
 
   const fetchPayments = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/admin/payment', {
+      const response = await axios.get('https://course-platform-backend-ten.vercel.app/admin/payment', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = response.data.payments;

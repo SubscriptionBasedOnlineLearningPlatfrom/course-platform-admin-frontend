@@ -14,7 +14,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:4000/admin/auth/login", {
+      const response = await fetch("https://course-platform-backend-ten.vercel.app/admin/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
