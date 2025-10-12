@@ -15,7 +15,7 @@ const Users = () => {
     setError('')
 
     try {
-      const token = localStorage.getItem('adminToken')
+      const token = localStorage.getItem('token')
       if (!token) {
         setError('No authentication token found')
         setLoading(false)
@@ -31,7 +31,7 @@ const Users = () => {
 
       if (response.status === 401) {
         setError('Authentication failed. Please login again.')
-        localStorage.removeItem('adminToken')
+        localStorage.removeItem('token')
         return
       }
 
@@ -55,7 +55,7 @@ const Users = () => {
   // Fetch user statistics
   const fetchUserStats = async () => {
     try {
-      const token = localStorage.getItem('adminToken')
+      const token = localStorage.getItem('token')
       if (!token) return
 
       const response = await fetch('https://course-platform-backend-ten.vercel.app/admin/users/stats', {
@@ -77,7 +77,7 @@ const Users = () => {
   // Toggle user status
   const toggleStatus = async (user) => {
     try {
-      const token = localStorage.getItem('adminToken')
+      const token = localStorage.getItem('token')
       if (!token) return
 
       const newStatus = user.status === 'active' ? 'inactive' : 'active'

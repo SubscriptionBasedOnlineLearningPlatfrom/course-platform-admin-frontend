@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../utils/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,28 +15,16 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("https://course-platform-backend-ten.vercel.app/admin/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const data = await login(email, password);
 
-      const data = await response.json();
+      // Store the JWT token
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("adminUser", JSON.stringify(data.admin));
 
-      if (response.ok) {
-        // Store the JWT token
-        localStorage.setItem("adminToken", data.token);
-        localStorage.setItem("adminUser", JSON.stringify(data.admin));
-
-        // Navigate to dashboard or users page
-        navigate("/users");
-      } else {
-        setError(data.error || "Login failed");
-      }
+      // Navigate to dashboard or users page
+      navigate("/dashboard");
     } catch (err) {
-      setError("Network error. Please try again.");
+      setError(err.message || "Login failed");
       console.error("Login error:", err);
     } finally {
       setLoading(false);
@@ -110,7 +99,7 @@ const Login = () => {
 
           <div className="mt-6 text-center text-sm text-gray-600">
             Don't have an account?{" "}
-            <a href="/" className="text-blue-600 font-medium hover:underline">
+            <a href="/Register" className="text-blue-600 font-medium hover:underline">
               Register
             </a>
           </div>
