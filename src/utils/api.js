@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "https://course-platform-backend-ten.vercel.app",
+  baseURL: import.meta.env.DEV ? '/api' : 'https://course-platform-backend-ten.vercel.app',
 });
 
 // attach token automatically
@@ -25,7 +25,7 @@ api.interceptors.response.use(
 
 // Axios instance for public requests (no token)
 export const publicApi = axios.create({
-  baseURL: "https://course-platform-backend-ten.vercel.app",
+  baseURL: import.meta.env.DEV ? '/api' : 'https://course-platform-backend-ten.vercel.app',
 });
 
 // global response error formatter for publicApi
@@ -59,5 +59,35 @@ export const getOverallAnalytics = async () => {
 
 export const getStudentActivity = async () => {
   const response = await publicApi.get("/admin/analytics/student-activity");
+  return response.data;
+};
+
+export const login = async (email, password) => {
+  const response = await publicApi.post("/admin/auth/login", { email, password });
+  return response.data;
+};
+
+export const register = async (userData) => {
+  const response = await publicApi.post("/admin/auth/register-public", userData);
+  return response.data;
+};
+
+export const getPayments = async () => {
+  const response = await api.get("/admin/payment");
+  return response.data;
+};
+
+export const getAllUsers = async (page = 1, limit = 10, search = '') => {
+  const response = await api.get(`/admin/users/all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
+  return response.data;
+};
+
+export const getUserStats = async () => {
+  const response = await api.get("/admin/users/stats");
+  return response.data;
+};
+
+export const updateUserStatus = async (userType, userId, status) => {
+  const response = await api.patch(`/admin/users/${userType}/${userId}/status`, { status });
   return response.data;
 };
