@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -17,9 +17,12 @@ function App() {
         {localStorage.getItem("token") && <Navbar />}
 
         <Routes>
+          {/* Root route - redirect based on authentication */}
+          <Route path="/" element={<Navigate to={localStorage.getItem("token") ? "/dashboard" : "/login"} replace />} />
+
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Register />} />
+          <Route path="/register" element={<Register />} />
 
           {/* Protected routes */}
           <Route
