@@ -4,9 +4,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear authentication data (if any)
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
+    localStorage.removeItem("adminToken");
 
     // Redirect to login page
     navigate("/login");
