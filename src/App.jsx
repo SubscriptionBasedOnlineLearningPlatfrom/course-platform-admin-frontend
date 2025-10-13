@@ -14,7 +14,7 @@ function App() {
   return (
       <div className="App">
         {/* Show navbar only when logged in */}
-        {localStorage.getItem("token") && <Navbar />}
+        {sessionStorage.getItem("adminToken") && <Navbar />}
 
         <Routes>
           {/* Public routes */}
