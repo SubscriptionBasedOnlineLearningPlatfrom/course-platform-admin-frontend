@@ -17,9 +17,11 @@ const Login = () => {
     try {
       const data = await login(email, password);
 
-      // Store the JWT token
-      localStorage.setItem("token", data.token);
+  // Store the JWT token under the admin-specific key
+  localStorage.setItem("adminToken", data.token);
       localStorage.setItem("adminUser", JSON.stringify(data.admin));
+
+  window.dispatchEvent(new Event("admin-auth-change"));
 
       // Navigate to dashboard or users page
       navigate("/dashboard");

@@ -5,6 +5,9 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
+
+    window.dispatchEvent(new Event("admin-auth-change"));
 
     // Redirect to login page
     navigate("/login");
