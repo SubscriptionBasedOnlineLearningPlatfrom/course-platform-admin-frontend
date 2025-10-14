@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getAdminToken, clearAdminAuth, dispatchAdminAuthChange } from "./adminAuth";
 
 export const api = axios.create({
   baseURL: import.meta.env.DEV ? '/api' : 'https://course-platform-backend-ten.vercel.app',
@@ -7,7 +8,7 @@ export const api = axios.create({
 // attach token automatically
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
+    const token = getAdminToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
@@ -18,8 +19,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status;
+
+    if (status === 401) {
+      clearAdminAuth();
+      dispatchAdminAuthChange();
+    }
+
     const message = error.response?.data?.message || "Something went wrong";
-    return Promise.reject(new Error(message));
+    const augmentedError = new Error(message);
+    augmentedError.status = status;
+    return Promise.reject(augmentedError);
   }
 );
 
@@ -73,7 +83,12 @@ export const register = async (userData) => {
 };
 
 export const getPayments = async () => {
-  const response = await api.get("/admin/payment");
+  const response = await api.get("/admin/payments");
+  return response.data;
+};
+
+export const getAdminDashboard = async () => {
+  const response = await api.get("/admin/dashboard");
   return response.data;
 };
 

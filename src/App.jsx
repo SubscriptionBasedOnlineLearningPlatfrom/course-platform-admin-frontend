@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { getAdminToken } from "./utils/adminAuth";
 
 import Users from "./pages/Users";
 import Login from "./pages/Login";
@@ -12,7 +13,7 @@ import CourseManagement from "./pages/CourseManagement";
 import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
-  const getAuthState = () => Boolean(localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken"));
+  const getAuthState = () => Boolean(getAdminToken());
   const [isAuthenticated, setIsAuthenticated] = useState(getAuthState);
 
   useEffect(() => {

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { getAllUsers, getUserStats as fetchUserStatsApi, updateUserStatus } from '../utils/api'
+import { getAdminToken, dispatchAdminAuthChange, clearAdminAuth } from '../utils/adminAuth'
 
 const Users = () => {
   const [users, setUsers] = useState([])
@@ -15,38 +17,28 @@ const Users = () => {
     setError('')
 
     try {
-  const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken')
+      const token = getAdminToken()
+
       if (!token) {
         setError('No authentication token found')
+        clearAdminAuth()
+        dispatchAdminAuthChange()
         setLoading(false)
         return
       }
 
-      const response = await fetch(`https://course-platform-backend-ten.vercel.app/admin/users/all?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.status === 401) {
-        setError('Authentication failed. Please login again.')
-        localStorage.removeItem('adminToken')
-        localStorage.removeItem('adminUser')
-        return
-      }
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setUsers(data.users)
-        setCurrentPage(data.pagination.page)
-        setTotalPages(data.pagination.pages)
-      } else {
-        setError(data.error || 'Failed to fetch users')
-      }
+      const data = await getAllUsers(page, 10, search)
+      setUsers(data.users)
+      setCurrentPage(data.pagination.page)
+      setTotalPages(data.pagination.pages)
     } catch (err) {
-      setError('Network error. Please try again.')
+      if (err.status === 401) {
+        setError('Authentication failed. Please login again.')
+        clearAdminAuth()
+        dispatchAdminAuthChange()
+      } else {
+        setError(err.message || 'Failed to fetch users')
+      }
       console.error('Error fetching users:', err)
     } finally {
       setLoading(false)
@@ -56,20 +48,15 @@ const Users = () => {
   // Fetch user statistics
   const fetchUserStats = async () => {
     try {
-  const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken')
-      if (!token) return
-
-      const response = await fetch('https://course-platform-backend-ten.vercel.app/admin/users/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const stats = await response.json()
-        setUserStats(stats)
+      const token = getAdminToken()
+      if (!token) {
+        clearAdminAuth()
+        dispatchAdminAuthChange()
+        return
       }
+
+      const stats = await fetchUserStatsApi()
+      setUserStats(stats)
     } catch (err) {
       console.error('Error fetching user stats:', err)
     }
@@ -78,31 +65,30 @@ const Users = () => {
   // Toggle user status
   const toggleStatus = async (user) => {
     try {
-  const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken')
-      if (!token) return
+      const token = getAdminToken()
+      if (!token) {
+        setError('No authentication token found')
+        clearAdminAuth()
+        dispatchAdminAuthChange()
+        return
+      }
 
       const newStatus = user.status === 'active' ? 'inactive' : 'active'
 
-      const response = await fetch(`https://course-platform-backend-ten.vercel.app/admin/users/${user.user_type}/${user.id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus })
-      })
+      await updateUserStatus(user.user_type, user.id, newStatus)
 
-      if (response.ok) {
-        // Update local state
-        setUsers(users.map(u =>
-          u.id === user.id ? { ...u, status: newStatus } : u
-        ))
-      } else {
-        const data = await response.json()
-        setError(data.error || 'Failed to update user status')
-      }
+      // Update local state
+      setUsers(users.map(u =>
+        u.id === user.id ? { ...u, status: newStatus } : u
+      ))
     } catch (err) {
-      setError('Network error. Please try again.')
+      if (err.status === 401) {
+        setError('Authentication failed. Please login again.')
+        clearAdminAuth()
+        dispatchAdminAuthChange()
+      } else {
+        setError(err.message || 'Failed to update user status')
+      }
       console.error('Error updating user status:', err)
     }
   }

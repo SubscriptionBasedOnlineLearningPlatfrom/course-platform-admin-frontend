@@ -22,7 +22,8 @@ import {
   Activity,
   Calendar,
 } from "lucide-react";
-import axios from "axios";
+import { getAdminDashboard } from "../utils/api";
+import { getAdminToken, clearAdminAuth, dispatchAdminAuthChange } from "../utils/adminAuth";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -35,24 +36,31 @@ const AdminDashboard = () => {
     completionRate: 0,
     monthlyGrowth: 0,
   });
-
-  const BackendAPI =
-    "https://course-platform-backend-ten.vercel.app/admin";
   const [revenueData, setRevenueData] = useState([]);
   const [enrollmentData, setEnrollmentData] = useState([]);
   const [courseDistribution, setCourseDistribution] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
+    setError("");
+
     try {
-      const response = await axios.get(`${BackendAPI}/dashboard`, {
-        withCredentials: true,
-      });
-      const data = response.data;
+      const token = getAdminToken();
+
+      if (!token) {
+        setError("No authentication token found");
+        clearAdminAuth();
+        dispatchAdminAuthChange();
+        return;
+      }
+
+      const data = await getAdminDashboard();
 
       setStats({
         totalStudents: data.stats.totalStudents || 0,
@@ -69,9 +77,16 @@ const AdminDashboard = () => {
       setRevenueData(data.revenueData || []);
       setEnrollmentData(data.enrollmentData || []);
       setCourseDistribution(data.courseDistribution || []);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+      if (error.status === 401) {
+        setError("Authentication failed. Please login again.");
+        clearAdminAuth();
+        dispatchAdminAuthChange();
+      } else {
+        setError(error.message || "Failed to fetch dashboard data");
+      }
+    } finally {
       setLoading(false);
     }
   };
@@ -106,7 +121,7 @@ const AdminDashboard = () => {
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>
-            <h1 className="text-4xl font-extrabold text-gray-900 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+            <h1 className="text-4xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
               Admin Dashboard
             </h1>
             <p className="text-gray-600 flex items-center gap-2 text-sm md:text-base">
@@ -120,6 +135,12 @@ const AdminDashboard = () => {
             </p>
           </div>
         </div>
+
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

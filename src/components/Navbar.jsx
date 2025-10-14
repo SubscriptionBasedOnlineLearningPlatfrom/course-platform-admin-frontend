@@ -1,13 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
+import { clearAdminAuth, dispatchAdminAuthChange } from "../utils/adminAuth";
 
 const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminUser");
-
-    window.dispatchEvent(new Event("admin-auth-change"));
+  clearAdminAuth();
+  dispatchAdminAuthChange();
 
     // Redirect to login page
     navigate("/login");
