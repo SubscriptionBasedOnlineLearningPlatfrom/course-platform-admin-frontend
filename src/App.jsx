@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -11,14 +12,29 @@ import CourseManagement from "./pages/CourseManagement";
 import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
+  const getAuthState = () => Boolean(localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken"));
+  const [isAuthenticated, setIsAuthenticated] = useState(getAuthState);
+
+  useEffect(() => {
+    const handleAuthChange = () => setIsAuthenticated(getAuthState());
+
+    window.addEventListener("storage", handleAuthChange);
+    window.addEventListener("admin-auth-change", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleAuthChange);
+      window.removeEventListener("admin-auth-change", handleAuthChange);
+    };
+  }, []);
+
   return (
       <div className="App">
         {/* Show navbar only when logged in */}
-        {localStorage.getItem("adminToken") && <Navbar />}
+        {isAuthenticated && <Navbar />}
 
         <Routes>
           {/* Root route - redirect based on authentication */}
-          <Route path="/" element={<Navigate to={localStorage.getItem("token") ? "/dashboard" : "/login"} replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
