@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { getPayments } from '../utils/api';
+import { getAdminToken, clearAdminAuth, dispatchAdminAuthChange } from '../utils/adminAuth';
 import {
   CreditCard, Search, Filter, Download, Calendar,
   User, DollarSign, TrendingUp, Eye, ChevronLeft, ChevronRight
@@ -20,6 +21,7 @@ const ViewPayments = () => {
     basicPlan: 0,
     proPlan: 0
   });
+  const [error, setError] = useState('');
 
   const itemsPerPage = 10;
 
@@ -43,22 +45,41 @@ const ViewPayments = () => {
   };
 
   const fetchPayments = async () => {
-    try {
-      const response = await axios.get('https://course-platform-backend-ten.vercel.app/admin/payments');
-      const data = response.data.payments;
+    setLoading(true);
+    setError('');
 
-      const paymentsWithInfo = data.map(p => ({
+    try {
+      const token = getAdminToken();
+
+      if (!token) {
+        setError('No authentication token found');
+        clearAdminAuth();
+        dispatchAdminAuthChange();
+        return;
+      }
+
+      const data = await getPayments();
+      const paymentsData = Array.isArray(data.payments) ? data.payments : [];
+
+      const paymentsWithInfo = paymentsData.map(p => ({
         ...p,
-       student_name: p.student_name || 'Unknown',
+        student_name: p.student_name || 'Unknown',
         student_email: p.student_email || 'Unknown',
         amount: getPlanAmount(p.plan)
       }));
 
       setPayments(paymentsWithInfo);
       calculateStats(paymentsWithInfo);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching payments:', error);
+      if (error.status === 401) {
+        setError('Authentication failed. Please login again.');
+        clearAdminAuth();
+        dispatchAdminAuthChange();
+      } else {
+        setError(error.message || 'Failed to fetch payments');
+      }
+    } finally {
       setLoading(false);
     }
   };
@@ -169,6 +190,12 @@ const ViewPayments = () => {
           </h1>
           <p className="text-gray-600">Track and manage all student subscription payments</p>
         </div>
+
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../utils/api";
+import { setAdminAuth, dispatchAdminAuthChange } from "../utils/adminAuth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,13 +16,10 @@ const Login = () => {
     setError("");
 
     try {
-      const data = await login(email, password);
+    const data = await login(email, password);
 
-  // Store the JWT token under the admin-specific key
-  localStorage.setItem("adminToken", data.token);
-      localStorage.setItem("adminUser", JSON.stringify(data.admin));
-
-  window.dispatchEvent(new Event("admin-auth-change"));
+    setAdminAuth({ token: data.token, admin: data.admin });
+    dispatchAdminAuthChange();
 
       // Navigate to dashboard or users page
       navigate("/dashboard");
